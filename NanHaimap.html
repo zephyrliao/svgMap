@@ -1,0 +1,170 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head> 
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+        <title>svgmap南海地图数据分布统计</title>
+        <meta name="keywords" content="svgmap南海区数据,jQuery南海地图Ip访问,js地图数据分布"/>
+        <meta name="description" content="svgmap地图南海各区数据展示"/>
+
+        <style>
+            p,ul,li,h1,h2,h3,h4,dd,dt,dl,blockquote{margin:0; padding:0}
+            img{border:0}
+            li{list-style-type:none}
+            a{color:#555; font-size:12px; cursor:pointer; text-decoration:none}
+            a:hover{color:#ff8400; text-decoration:none}
+            .fr{float:right}
+            .fl{float:left}
+            .cl{clear:both}
+            .clearfix:after{visibility:hidden; display:block; font-size:0; content:" "; clear:both; height:0}
+            *:first-child+html .clearfix{zoom:1}
+            /* 提示自定义 */
+            .stateTip, #map_tip{display:none; position:absolute; padding:8px; background:#fff; border:2px solid #2385B1; -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; font-size:12px; font-family:Tahoma; color:#333;}
+
+            .mapInfo i{ display:inline-block; width:15px; height:15px; margin-top:5px; line-height:15px; font-style:normal; background:#aeaeae; color:#fff; font-size:11px; font-family: Tahoma; -webkit-border-radius:15px; border-radius:15px; text-align:center}
+            .mapInfo i.active{background:#E27F21;}
+            .mapInfo span{ padding:0 5px 0 3px;}
+            .mapInfo b{ font-weight:normal; color:#2770B5}
+
+            .progress {
+                border-radius:0;
+                -webkit-box-shadow:none;
+                box-shadow:none;
+                background:#dadada;
+                height:20px;
+            }
+            .progress .progress-bar {
+                -webkit-box-shadow:none;
+                box-shadow:none;
+                line-height:18px
+            }
+            .progress[data-percent] {
+                position:relative
+            }
+            .progress[data-percent]:after {
+                display:inline-block;
+                content:attr(data-percent);
+                color:#FFF;
+                position:absolute;
+                left:0;
+                right:0;
+                top:0;
+                bottom:0;
+                line-height:20px;
+                text-align:center;
+                font-size:12px;
+                font-family:Verdana
+            }
+            .progress.progress-yellow[data-percent]:after {
+                color:#963
+            }
+            .progress.progress-small {
+                height:12px
+            }
+            .progress.progress-small .progress-bar {
+                line-height:10px;
+                font-size:11px
+            }
+            .progress.progress-small[data-percent]:after {
+                line-height:10px;
+                font-size:11px
+            }
+            .progress.progress-mini {
+                height:9px
+            }
+            .progress.progress-mini .progress-bar {
+                line-height:8px;
+                font-size:11px
+            }
+            .progress.progress-mini[data-percent]:after {
+                line-height:8px;
+                font-size:11px
+            }
+            .progress-bar {
+                background-color:#2a91d8
+            }
+            .map_deep{text-align: center;}  
+            .progress-bar {
+                background-color: #428bca;
+                color: #fff;
+                float: left;
+                font-size: 12px;
+                height: 100%;
+                text-align: center;
+                transition: width 0.6s ease 0s;
+                width: 0;
+            }
+        </style>
+    </head>
+    <body>
+        
+        <div id="Region" style="position:relative; height:500px;width:850px;margin:0 auto" class="clearfix">
+            <div class="maps_area clearfix" id="maps_area" style="float:left;">
+                <div class="regionMap" id="RegionMap" style="margin:30px 0 0"></div>
+                <div class="map_deep"></div>
+            </div>
+          </div>
+        </div>
+        <script type="text/javascript" src="jquery.js"></script>
+        <script type="text/javascript" src="lib/raphael-min.js"></script>
+        <script type="text/javascript" src="res/nanHaiMapConfig.js"></script>
+        <script type="text/javascript" src="map.js"></script>
+        <script type="text/javascript">
+            var maps_json = '{"guicheng":{"name":"\u4e0a\u6d77","value":"35.38%","stateInitColor":0,"index":1,"color":"003399"},"dali":{"name":"\u5317\u4eac","value":"14.15%","stateInitColor":1,"index":2,"color":"0058B0"},"lishui":{"name":"\u9655\u897f","value":"19.34%","stateInitColor":2,"index":3,"color":"0071E1"},"shishan":{"name":"\u65b0\u7586","value":"5.90%","stateInitColor":3,"index":4,"color":"1C8DFF"},"jiujiang":{"name":"\u5e7f\u897f","value":"14.15%","stateInitColor":4,"index":5,"color":"51A8FF"},"xiqiao":{"name":"\u53f0\u6e7e","value":"8.25%","stateInitColor":5,"index":6,"color":"82C0FF"},"danzao":{"name":"\u5176\u4ed6\u5730\u533a","value":"2.83%","stateInitColor":6,"index":7,"color":"AAD5FF"}}';
+
+            if (maps_json == '') {
+
+            } else {
+                var data = eval("(" + maps_json + ")");
+
+                var colors_json = '["003399","0058B0","0071E1","1C8DFF","51A8FF","82C0FF","AAD5FF"]';
+
+                var mapObj_1 = {};
+                var stateColorList = eval("(" + colors_json + ")");
+
+                $('#RegionMap').SVGMap({
+                    external: mapObj_1,
+                    mapName: 'nanHai',
+                    mapWidth: 450,
+                    mapHeight: 450,
+					//stateColorList: ['E8505D','FF837F','F26E8A','E65F93','FBAC52','FDB26D','FD9B6F'],
+                    stateData: data,
+                    stateTipWidth: 118,
+                    stateTipHeight: 47,
+                    stateTipX: 2,
+                    stateTipY: 0,
+                    stateTipHtml: function(mapData, obj) {
+                        var has = 0;
+                        for (var key in mapData) {
+                            if (key == obj.id) {
+                                has++;
+                            }
+                        }
+                        var tipStr = "暂无数据";
+                        if (has > 0) {
+                            var _value = mapData[obj.id].value;
+
+                            var _idx = mapData[obj.id].index;
+                            var active = '';
+                            _idx < 4 ? active = 'active' : active = '';
+                            tipStr = '<div class="mapInfo"><i class="' + active + '">' + _idx + '</i><span>' + obj.name + '</span><b>' + _value + '</b></div>';
+                        }
+                        return tipStr;
+                    }
+                });
+            }
+           
+        </script>
+    </body>
+</html>
+
+
+
+
+
+<style type="text/css">
+    .vad { margin: 120px 0 5px; font-family: Consolas,arial,宋体,sans-serif; text-align:center;}
+    .vad a { display: inline-block; height: 36px; line-height: 36px; margin: 0 5px; padding: 0 50px; font-size: 14px; text-align:center; color:#eee; text-decoration: none; background-color: #222;}
+    .vad a:hover { color: #fff; background-color: #000;}
+    .thead { width: 728px; height: 90px; margin: 0 auto; border-bottom: 40px solid #fff;}
+</style>
